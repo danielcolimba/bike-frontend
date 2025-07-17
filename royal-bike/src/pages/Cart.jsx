@@ -1,51 +1,63 @@
 // src/pages/Cart.jsx
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
 
-const list_of_products = [
-  {
-    id: 1,
-    name: "Speedster Road 300",
-    image_url: "https://example.com/images/speedster.jpg",
-    price: 999.99,
-    quantity: 2,
-    weight: 8.5,
-    color: "Rojo",
-    material: "Aluminio",
-    wheel_size: "700c",
+const token = localStorage.getItem("accessToken");
+
+fetch("http://localhost:8000/api/cart/", {
+  method: "GET", // o POST, DELETE, etc.
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`, // 💡 esto es esencial
   },
-  {
-    id: 2,
-    name: "Mountain Climber XT",
-    image_url: "https://example.com/images/climber.jpg",
-    price: 1249.5,
-    quantity: 1,
-    weight: 12.2,
-    color: "Negro",
-    material: "Carbono",
-    wheel_size: '29"',
-  },
-  {
-    id: 3,
-    name: "Urban Glide 2.0",
-    image_url: "https://example.com/images/urban.jpg",
-    price: 789.0,
-    quantity: 3,
-    weight: 10.0,
-    color: "Gris",
-    material: "Acero",
-    wheel_size: "700c",
-  },
-];
+})
+  .then((res) => {
+    if (res.status === 401) {
+      //alert("Por favor inicia sesión.");
+    }
+    return res.json();
+  })
+  .then((data) => console.log("Carrito:", data))
+  .catch((err) => console.error(err));
 
 const TAX_RATE = 0.12;
 
 const Cart = ({
-  cartItems = list_of_products,
   increment,
   decrement,
   remove,
 }) => {
+  const [cartItems, setCartItems] = useState([]);
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      alert("Debes iniciar sesión para ver el carrito.");
+      window.location.href = "/login";
+      return;
+    }
+
+    try {
+      jwtDecode(token);
+
+      fetch("http://localhost:8000/cart/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => setCartItems(data.items)) // ajusta según respuesta del backend
+        .catch((err) => console.error(err));
+    } catch (err) {
+      console.error("Token inválido:", err);
+      localStorage.removeItem("accessToken");
+      window.location.href = "/login";
+    }
+  }, []);
+
+
   const navigate = useNavigate();
   const hasItems = cartItems.length > 0;
 
@@ -121,7 +133,9 @@ const Cart = ({
                   {/* Precios */}
                   <div className="flex flex-col text-gray-600 px-4">
                     <span>Price: ${item.price.toFixed(2)}</span>
-                    <span className="mt-4">+VAT: ${(item.price * TAX_RATE).toFixed(2)}</span>
+                    <span className="mt-4">
+                      +VAT: ${(item.price * TAX_RATE).toFixed(2)}
+                    </span>
                   </div>
 
                   {/* Botón eliminar */}
@@ -129,7 +143,7 @@ const Cart = ({
                     onClick={() => remove(item.id)}
                     className="p-2 text-red-500 hover:text-red-700 px-7 cursor-pointer"
                   >
-                    <FaTrash size={22}/>
+                    <FaTrash size={22} />
                   </button>
                 </div>
               ))}

@@ -54,15 +54,10 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("accessToken", data.access);
-
         const decoded = jwtDecode(data.access);
         setLoggedInUser(decoded.username); // por ejemplo, guardar en un useState
-
         setLoginSuccess(true); // muestra el componente de éxito
-        localStorage.setItem("token", data.token);
-
-        // Redirigir o mostrar vista protegida
+        localStorage.setItem("accessToken", data.access);
         // navigate("/dashboard"); // si usas React Router
       } else {
         alert(data.error || "Credenciales incorrectas");

@@ -8,12 +8,13 @@ import {
 import Footer from "../components/Footer";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 const Products = () => {
   const [bicycles, setBicycles] = useState([]);
   const [accessories, setAccessories] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const { fetchCart } = useCart();
   const location = useLocation();
 
   useEffect(() => {
@@ -50,6 +51,52 @@ const Products = () => {
       }
     }
   }, [loading, location]);
+
+  const addToCart = async (productId) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("Debes iniciar sesión para agregar productos.");
+      return;
+    }
+    console.log("Token enviado:", token);
+    try {
+      const res = await fetch("http://localhost:8000/api/cart/add/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity: 1,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Respuesta del servidor no OK:", errorData);
+        // Si el token no es válido, redirigir al login
+        if (errorData.code === "token_not_valid") {
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
+          return;
+        }
+        alert("Error al agregar al carrito: " + (errorData.detail || "Error desconocido"));
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Producto agregado:", data);
+      alert("Producto agregado al carrito exitosamente");
+      // Actualizar el contador del carrito
+      fetchCart();
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error de conexión. Por favor, intenta nuevamente.");
+    }
+  };
 
   return (
     <>
@@ -141,7 +188,10 @@ const Products = () => {
                       <button className="flex-1 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition">
                         Ver detalles
                       </button>
-                      <button className="flex-1 py-2 bg-white text-yellow-500 border border-yellow-500 font-semibold rounded-lg hover:bg-gray-100 transition">
+                      <button
+                        onClick={() => addToCart(bike.id)}
+                        className="flex-1 py-2 bg-white text-yellow-500 border border-yellow-500 font-semibold rounded-lg hover:bg-gray-100 transition"
+                      >
                         <FaShoppingCart className="inline mr-2" />
                         Agregar al carrito
                       </button>
@@ -207,7 +257,10 @@ const Products = () => {
                       <button className="flex-1 py-2 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition">
                         Ver detalles
                       </button>
-                      <button className="flex-1 py-2 bg-white text-yellow-500 border border-yellow-500 font-semibold rounded-lg hover:bg-gray-100 transition">
+                      <button 
+                        onClick={() => addToCart(accesory.id)}
+                        className="flex-1 py-2 bg-white text-yellow-500 border border-yellow-500 font-semibold rounded-lg hover:bg-gray-100 transition"
+                      >
                         <FaShoppingCart className="inline mr-2" />
                         Agregar al carrito
                       </button>
@@ -219,10 +272,10 @@ const Products = () => {
       </main>
 
       <footer className="bg-gray-800 text-white text-center py-6">
-      <section>
-        <Footer />
-      </section>
-    </footer>
+        <section>
+          <Footer />
+        </section>
+      </footer>
     </>
   );
 };
