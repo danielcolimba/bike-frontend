@@ -8,14 +8,16 @@ import { useCart } from "../context/CartContext";
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
-  const { cartCount } = useCart();
+  const { cartCount, fetchCart } = useCart();
+  
   useEffect(() => {
-    
     const token = localStorage.getItem("accessToken");
     if (token) {
       try {
         const decoded = jwtDecode(token);
         setUser(decoded);
+        // Actualizar el carrito cuando el usuario está logueado
+        fetchCart();
       } catch (err) {
         console.error("Token inválido:", err);
         localStorage.removeItem("accessToken");
@@ -24,11 +26,14 @@ const Navbar = () => {
     } else {
       setUser(null);
     }
-  }, []);
+  }, [fetchCart]);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     setUser(null);
+    // Limpiar el contador del carrito al cerrar sesión
+    fetchCart();
     window.location.href = "/";
   };
 
@@ -58,12 +63,12 @@ const Navbar = () => {
           </a>
           <a
             href="/cart"
-            className="relative flex items-center text-gray-700 hover:text-gray-900 transition"
+            className="relative flex items-center text-gray-700 hover:text-gray-900 transition group"
           >
-            <FaShoppingCart className="w-6 h-6 text-gray-700"/>
+            <FaShoppingCart className="w-6 h-6 text-gray-700 group-hover:text-yellow-500 transition-colors"/>
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                {cartCount}
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
+                {cartCount > 99 ? '99+' : cartCount}
               </span>
             )}
           </a>

@@ -8,7 +8,10 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = async () => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return;
+    if (!token) {
+      setCartCount(0);
+      return;
+    }
 
     try {
       const res = await fetch("http://localhost:8000/api/cart/view/", {
@@ -19,11 +22,19 @@ export const CartProvider = ({ children }) => {
 
       if (res.ok) {
         const data = await res.json();
-        const totalItems = Object.values(data).reduce((sum, qty) => sum + parseInt(qty), 0);
-        setCartCount(totalItems);
+        // La nueva estructura devuelve { items: [...] }
+        if (data.items && Array.isArray(data.items)) {
+          const totalItems = data.items.reduce((sum, item) => sum + item.quantity, 0);
+          setCartCount(totalItems);
+        } else {
+          setCartCount(0);
+        }
+      } else {
+        setCartCount(0);
       }
     } catch (err) {
       console.error("Error al obtener el carrito", err);
+      setCartCount(0);
     }
   };
 

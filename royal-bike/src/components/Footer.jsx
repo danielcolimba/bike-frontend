@@ -24,14 +24,14 @@ const Footer = () => {
           {/* Enlaces tipo hamburguesa */}
           <nav className="flex flex-col space-y-5">
             <a href="/" className="hover:underline text-base">
-              Home
+              Inicio
             </a>
             <a href="/products" className="hover:underline text-base">
-              Bicycles
+              Bicicletas
             </a>
             
             <a href="/products#accesorios" className="hover:underline text-base">
-              Gear
+              Accesorios
             </a>
           </nav>
 
