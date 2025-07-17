@@ -102,16 +102,16 @@ const Navbar = () => {
           ) : (
             <>
               <button
-                className="px-4 py-2 border border-amber-300 text-gray-700 rounded hover:bg-blue-50 transition"
+                className="px-3 py-2 border border-amber-300 text-gray-700 rounded hover:bg-blue-50 transition"
                 onClick={() => (window.location.href = "/login")}
               >
-                Login
+                Iniciar sesión
               </button>
               <button
-                className="px-4 py-2 bg-amber-300 text-white rounded hover:bg-yellow-600 transition"
-                onClick={() => (window.location.href = "/register")}
+                className="px-3 py-2 bg-amber-300 text-white rounded hover:bg-yellow-600 transition"
+                onClick={() => (window.location.href = "/login?register=true")}
               >
-                Sign Up
+                Registrarse
               </button>
             </>
           )}

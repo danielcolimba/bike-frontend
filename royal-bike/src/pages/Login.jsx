@@ -1,5 +1,5 @@
 // Login.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaFacebook,
   FaGoogle,
@@ -11,6 +11,7 @@ import { TbLockPassword } from "react-icons/tb";
 import logo from "../assets/logo_site.png";
 import LoginSuccessCard from "../components/LoginSuccessCard";
 import { jwtDecode } from "jwt-decode";
+
 
 
 const Login = () => {
@@ -27,6 +28,15 @@ const Login = () => {
   const [loginSuccess, setLoginSuccess] = useState(false);
   // Estados para controlar el formulario de registro
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldRegister = urlParams.get('register');
+    
+    if (shouldRegister === 'true') {
+      setIsRegistering(true);
+    }
+  }, []);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -233,29 +243,21 @@ const Login = () => {
               </button>
             </form>
           )}
-          <div className="relative flex items-center py-5">
-            <div className="flex-grow border-t border-gray-300"></div>
-            <span className="flex-shrink mx-4 text-gray-500 text-sm">
-              O inicia sesión con
-            </span>
-            <div className="flex-grow border-t border-gray-300"></div>
+          
+          <div className="border-t border-gray-300 pt-6 mt-6">
+            <div className="text-center">
+              <p className="text-gray-600 text-sm mb-2">
+                ¿Aún no tienes cuenta?
+              </p>
+              <button
+                onClick={() => setIsRegistering(true)}
+                className="text-yellow-600 hover:text-yellow-700 font-medium text-sm hover:underline cursor-pointer"
+              >
+                Crea una aquí
+              </button>
+            </div>
           </div>
 
-          <div className="flex justify-center">
-            <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center mx-2 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-              <FaGoogle className="text-red-600" size={22} />
-            </div>
-            <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center mx-2 cursor-pointer hover:bg-gray-50 transition-colors duration-200">
-              <FaFacebook className="text-blue-600" size={22} />
-            </div>
-            {/* --- BOTÓN TRIGGER PARA REGISTRO --- */}
-            <div
-              onClick={() => setIsRegistering(true)}
-              className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center mx-2 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-            >
-              <FaEnvelope className="text-gray-600" size={22} />
-            </div>
-          </div>
         </div>
 
         {/* === TARJETA DE REGISTRO === */}

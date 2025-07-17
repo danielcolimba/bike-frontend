@@ -71,15 +71,25 @@ const Cart = () => {
     fetchCartItems();
   }, []);
 
-
   const navigate = useNavigate();
   const hasItems = cartItems.length > 0;
 
-  // cálculos de totales
-  const subtotal = cartItems.reduce(
+  // Cálculos de totales con descuentos
+  const subtotalOriginal = cartItems.reduce(
     (sum, item) => sum + (parseFloat(item.price) * item.quantity),
     0
   );
+
+  const totalDescuento = cartItems.reduce(
+    (sum, item) => {
+      const discount = item.discount || 0;
+      const descuentoMonto = (parseFloat(item.price) * item.quantity * discount) / 100;
+      return sum + descuentoMonto;
+    },
+    0
+  );
+
+  const subtotal = subtotalOriginal - totalDescuento;
   const tax = subtotal * TAX_RATE;
   const total = subtotal + tax;
 
@@ -174,118 +184,208 @@ const Cart = () => {
           </div>
         ) : (
           // Estado con items
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Lista de productos */}
-            <div className="flex-1 space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center bg-gray-200 rounded-lg p-4"
-                >
-                  {/* Imagen */}
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="w-50 h-30 object-cover rounded"
-                  />
+  <div className="flex flex-col lg:flex-row gap-8">
+    {/* Lista de productos */}
+    <div className="flex-1 space-y-4">
+      {cartItems.map((item) => {
+        const hasDiscount = item.discount && item.discount > 0;
+        const originalPrice = parseFloat(item.price);
+        const discountAmount = hasDiscount ? (originalPrice * item.discount) / 100 : 0;
+        const discountedPrice = originalPrice - discountAmount;
+        
+        return (
+          <div
+            key={item.id}
+            className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-6"
+          >
+            <div className="flex flex-col sm:flex-row gap-6">
+              {/* Imagen del producto */}
+              <div className="flex-shrink-0">
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="w-32 h-32 sm:w-40 sm:h-32 object-cover rounded-lg border border-gray-100"
+                />
+              </div>
 
-                  {/* Detalle del producto */}
-                  <div className="flex-1 flex flex-col items-center">
-                    <h2 className="text-lg font-semibold text-gray-800 text-center">
-                      {item.name}
-                    </h2>
-                    
-                    {/* Tipo de producto */}
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        item.type === 'bicycle' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {item.type === 'bicycle' ? 'Bicicleta' : 'Accesorio'}
+              {/* Información del producto */}
+              <div className="flex-1 min-w-0">
+                {/* Header con nombre y badges */}
+                <div className="mb-3">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {item.name}
+                  </h3>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full ${
+                      item.type === 'bicycle' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {item.type === 'bicycle' ? 'Bicicleta' : 'Accesorio'}
+                    </span>
+                    {hasDiscount ? (
+                      <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                        -{item.discount}% OFF
                       </span>
-                        <span className="text-xs text-gray-500">
-                          Cat: {item.category}
-                        </span>
-                    </div>
+                    ) : (
+                      <span className="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                        Sin descuento
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-                    {/* Controles de cantidad */}
-                    <div className="flex items-center space-x-2 mt-2">
+                {/* Controles de cantidad y precios */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  {/* Controles de cantidad */}
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium text-gray-700 mr-3">Cantidad:</span>
+                    <div className="flex items-center border border-gray-300 rounded-lg">
                       <button
                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-2 hover:bg-gray-50 transition-colors rounded-l-lg"
                       >
-                        <FaMinus className="text-gray-600" />
+                        <FaMinus className="w-3 h-3 text-gray-600" />
                       </button>
-                      <span className="px-2">{item.quantity}</span>
+                      <span className="px-4 py-2 text-sm font-medium border-x border-gray-300 min-w-[50px] text-center">
+                        {item.quantity}
+                      </span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-2 hover:bg-gray-50 transition-colors rounded-r-lg"
                       >
-                        <FaPlus className="text-gray-600" />
+                        <FaPlus className="w-3 h-3 text-gray-600" />
                       </button>
                     </div>
                   </div>
-                  {/* Precios */}
-                  <div className="flex flex-col text-gray-600 px-4">
-                    <span>Precio: ${parseFloat(item.price).toFixed(2)}</span>
-                    <span className="mt-2 text-sm">
-                      IVA (12%): ${(parseFloat(item.price) * item.quantity * TAX_RATE).toFixed(2)}
-                    </span>
-                  </div>
 
-                  {/* Botón eliminar */}
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="p-2 text-red-500 hover:text-red-700 px-7 cursor-pointer"
-                  >
-                    <FaTrash size={22} />
-                  </button>
+                  {/* Información de precios */}
+                  <div className="text-right">
+                    <div className="space-y-1">
+                      {hasDiscount ? (
+                        <>
+                          <div className="text-sm text-gray-500">
+                            <span className="line-through">Precio: ${originalPrice.toFixed(2)}</span>
+                          </div>
+                          <div className="text-sm text-green-600">
+                            Precio con descuento: ${discountedPrice.toFixed(2)}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-sm font-semibold text-gray-900">
+                          Precio: ${originalPrice.toFixed(2)}
+                        </div>
+                      )}
+                      
+                      <div className="text-sm text-gray-600">
+                        IVA (12%): ${(discountedPrice * item.quantity * TAX_RATE).toFixed(2)}
+                      </div>
+                      
+                      <div className="text-lg font-bold text-gray-900 border-t border-gray-200 pt-1">
+                        Subtotal: ${(discountedPrice * item.quantity).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            {/* Barra lateral de totales */}
-            <div className="w-full lg:w-1/3 bg-gray-50 rounded-lg p-6 shadow-inner">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Resumen del Pedido
-              </h2>
-              
-              {/* Detalle por producto */}
-              <div className="space-y-2 mb-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm text-gray-600">
-                    <span>{item.name} x{item.quantity}</span>
-                    <span>${parseFloat(item.subtotal).toFixed(2)}</span>
-                  </div>
-                ))}
+              {/* Botón eliminar */}
+              <div className="flex-shrink-0 flex sm:flex-col justify-end items-start">
+                <button
+                  onClick={() => removeItem(item.id)}
+                  className="inline-flex items-center justify-center w-10 h-10 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Eliminar producto"
+                >
+                  <FaTrash size={16} />
+                </button>
               </div>
-              
-              <hr className="border-gray-300 mb-4" />
-              
-              <div className="flex justify-between text-gray-600 mb-2">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 mb-4">
-                <span>IVA (12%)</span>
-                <span>${tax.toFixed(2)}</span>
-              </div>
-              <hr className="border-gray-300 mb-4" />
-              <div className="flex justify-between text-gray-800 text-xl font-bold mb-6">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-              <button
-                onClick={() => {
-                  /* lógica de pago */
-                }}
-                className="w-full py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition"
-              >
-                Proceder al Pago
-              </button>
             </div>
           </div>
+        );
+      })}
+    </div>
+
+    {/* Barra lateral de totales */}
+    <div className="w-full lg:w-96 bg-gray-50 rounded-xl p-6 shadow-sm h-fit sticky top-6">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        Resumen del Pedido
+      </h2>
+      
+      {/* Detalle por producto */}
+      <div className="space-y-3 mb-6">
+        {cartItems.map((item) => {
+          const hasDiscount = item.discount && item.discount > 0;
+          const originalPrice = parseFloat(item.price);
+          const discountedPrice = hasDiscount 
+            ? originalPrice - (originalPrice * item.discount) / 100 
+            : originalPrice;
+          const subtotalItem = discountedPrice * item.quantity;
+          
+          return (
+            <div key={item.id} className="flex justify-between items-center text-sm">
+              <span className="text-gray-700 flex-1 mr-2">
+                {item.name} <span className="text-gray-500">×{item.quantity}</span>
+              </span>
+              <span className="font-medium text-gray-900">
+                ${subtotalItem.toFixed(2)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      
+      <hr className="border-gray-300 mb-6" />
+      
+      {/* Cálculos de totales */}
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between text-gray-600">
+          <span>Subtotal original</span>
+          <span>${subtotalOriginal.toFixed(2)}</span>
+        </div>
+        
+        {totalDescuento > 0 && (
+          <div className="flex justify-between text-green-600 font-medium">
+            <span>Descuentos aplicados</span>
+            <span>-${totalDescuento.toFixed(2)}</span>
+          </div>
+        )}
+        
+        <div className="flex justify-between text-gray-600">
+          <span>Subtotal</span>
+          <span>${subtotal.toFixed(2)}</span>
+        </div>
+        
+        <div className="flex justify-between text-gray-600">
+          <span>IVA (12%)</span>
+          <span>${tax.toFixed(2)}</span>
+        </div>
+      </div>
+      
+      <hr className="border-gray-300 mb-6" />
+      
+      <div className="flex justify-between items-center text-xl font-bold text-gray-900 mb-6">
+        <span>Total</span>
+        <span className="text-2xl text-yellow-600">${total.toFixed(2)}</span>
+      </div>
+      
+      <button
+        onClick={() => {
+          /* lógica de pago */
+        }}
+        className="w-full py-4 bg-yellow-500 text-white font-semibold text-lg rounded-xl hover:bg-yellow-600 transition-colors shadow-lg hover:shadow-xl"
+      >
+        Proceder al Pago
+      </button>
+      
+      <button
+        onClick={() => navigate("/products")}
+        className="w-full mt-3 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+      >
+        Continuar Comprando
+      </button>
+    </div>
+  </div>
         )}
       </div>
     </main>
