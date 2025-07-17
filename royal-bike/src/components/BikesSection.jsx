@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const BikesSection = () => {
   const [sellBikes, setSellBikes] = useState([]);
+  const { fetchCart } = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:8000/api/top-bicycles/")
@@ -11,6 +15,55 @@ const BikesSection = () => {
       })
       .catch((err) => console.error(err));
   }, []);
+
+  const handleBuyNow = async (productId) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("Debes iniciar sesión para agregar productos.");
+      return;
+    }
+    console.log("Token enviado:", token);
+    try {
+      const res = await fetch("http://localhost:8000/api/cart/add/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity: 1,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Respuesta del servidor no OK:", errorData);
+        // Si el token no es válido, redirigir al login
+        if (errorData.code === "token_not_valid") {
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
+          return;
+        }
+        alert(
+          "Error al agregar al carrito: " +
+            (errorData.detail || "Error desconocido")
+        );
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Producto agregado:", data);
+      alert("Producto agregado al carrito exitosamente");
+      fetchCart();
+      navigate("/cart");
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error de conexión. Por favor, intenta nuevamente.");
+    }
+  };
 
   return (
     <section className="py-12 bg-white">
@@ -32,7 +85,10 @@ const BikesSection = () => {
             <p className="text-3xl text-blue-600 font-bold my-2">
               ${bike.price}
             </p>
-            <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg">
+            <button
+              onClick={() => handleBuyNow(bike.id)}
+              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition duration-200 shadow-lg"
+            >
               Comprar ahora
             </button>
           </div>

@@ -1,32 +1,78 @@
-import bike1 from '../assets/bike1.png';
-import bike2 from '../assets/bike2.png';
-import bike3 from '../assets/bike3.png';
-
-const accessories = [
-  {
-    id: 1,
-    name: "Bicicleta de montaña",
-    price: "$300",
-    originalPrice: "$400",
-    image: bike1,
-  },
-  {
-    id: 2,
-    name: "Bicicleta urbana",
-    price: "$250",
-    originalPrice: "$400",
-    image: bike2,
-  },
-  {
-    id: 3,
-    name: "Bicicleta eléctrica",
-    price: "$700",
-    originalPrice: "$400",
-    image: bike3,
-  },
-];
+import { useEffect, useState } from "react";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const AccessoriesSection = () => {
+  const [listGear, setListGear] = useState([]);
+  const { fetchCart } = useCart();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      fetch("http://localhost:8000/api/gear-discounts/")
+        .then((res) => res.json())
+        .then((data) => {
+          setListGear(data);
+        })
+        .catch((err) => console.error(err));
+    }, []);
+
+  
+
+  const accessories = listGear.map((item) => ({
+    name: item.name,
+    image: item.image_url,
+    price: item.price - (item.price * item.discount / 100),
+    originalPrice: item.price,
+    id: item.id
+  }));
+
+  const handleBuyNow = async (productId) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("Debes iniciar sesión para agregar productos.");
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:8000/api/cart/add/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          quantity: 1,
+        }),
+      }); 
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Respuesta del servidor no OK:", errorData);
+        // Si el token no es válido, redirigir al login
+        if (errorData.code === "token_not_valid") {
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
+          return;
+        }
+        alert(
+          "Error al agregar al carrito: " +
+            (errorData.detail || "Error desconocido")
+        );
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Producto agregado:", data);
+      alert("Producto agregado al carrito exitosamente");
+      fetchCart();
+      navigate("/cart");
+    } catch (error) {
+      console.error("Error de red:", error);
+      alert("Error de conexión. Por favor, intenta nuevamente.");
+    }
+  };
+
   return (
     <section className="py-12 bg-gray-900">
       <h2 className="text-4xl font-extrabold text-center text-white mb-10">
@@ -51,16 +97,20 @@ const AccessoriesSection = () => {
 
             {/* Precio con descuento */}
             {/* Mostrar precio con descuento y a un lago el precio original tachado */}
-            <div className='flex items-center mt-2 space-x-5'>
+            <div className='flex items-center mt-2 '>
+            
+              
+
               <p className="text-3xl text-yellow-500 font-bold">
-                {item.price}
+                $ {item.price}
               </p>
-              <span className="text-gray-400 line-through text-m font-bold">
+              <span className="text-gray-400 line-through text-m font-bold ml-4">
                 {item.originalPrice}
               </span>
             </div>
 
-            <button className="mt-4 bg-yellow-500 text-gray-900 px-4 py-2 rounded-xl hover:bg-yellow-600 transition">
+            <button onClick={() => handleBuyNow(item.id)}
+            className="mt-4 bg-yellow-500 text-gray-900 px-4 py-2 rounded-xl hover:bg-yellow-600 transition">
               Comprar
             </button>
           </div>
