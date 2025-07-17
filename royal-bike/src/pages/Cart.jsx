@@ -4,6 +4,7 @@ import { FaShoppingCart, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import ConfirmPopUp from "../components/ConfirmPopUp";
+import { API_ENDPOINTS } from "../config/rutes";
 
 const TAX_RATE = 0.12;
 
@@ -28,7 +29,7 @@ const Cart = () => {
         jwtDecode(token);
 
         // Hacer la petición al backend para obtener los productos del carrito
-        const response = await fetch("http://localhost:8000/api/cart/view/", {
+        const response = await fetch(API_ENDPOINTS.CART_VIEW, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -119,7 +120,7 @@ const Cart = () => {
         product_id: item.id, // bicycle_id en la tabla api_bicyclesale
         quantity: item.quantity, // cantidad comprada
       }));
-      const response = await fetch("http://localhost:8000/api/buy/checkout/", {
+      const response = await fetch(API_ENDPOINTS.BUY_CHECKOUT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -168,7 +169,7 @@ const Cart = () => {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:8000/api/cart/update/", {
+      const response = await fetch(API_ENDPOINTS.CART_UPDATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -199,7 +200,7 @@ const Cart = () => {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:8000/api/cart/remove/", {
+      const response = await fetch(API_ENDPOINTS.CART_REMOVE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

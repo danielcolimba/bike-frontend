@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { API_ENDPOINTS } from "../config/rutes";
 
 const Products = () => {
   const [bicycles, setBicycles] = useState([]);
@@ -18,7 +19,7 @@ const Products = () => {
   const location = useLocation();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/products/")
+    fetch(API_ENDPOINTS.PRODUCTS)
       .then((res) => res.json())
       .then((data) => {
         const onlyBikes = data.filter((item) => item.type === "bicycle");
@@ -60,7 +61,7 @@ const Products = () => {
     }
     console.log("Token enviado:", token);
     try {
-      const res = await fetch("http://localhost:8000/api/cart/add/", {
+      const res = await fetch(API_ENDPOINTS.CART_ADD, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

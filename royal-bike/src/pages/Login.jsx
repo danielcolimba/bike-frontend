@@ -11,6 +11,7 @@ import { TbLockPassword } from "react-icons/tb";
 import logo from "../assets/logo_site.png";
 import LoginSuccessCard from "../components/LoginSuccessCard";
 import { jwtDecode } from "jwt-decode";
+import { API_ENDPOINTS } from "../config/rutes";
 
 
 
@@ -53,7 +54,7 @@ const Login = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:8001/auth/login/", {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,7 +100,7 @@ const Login = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8001/auth/register/user/",
+        API_ENDPOINTS.REGISTER,
         {
           method: "POST",
           headers: {

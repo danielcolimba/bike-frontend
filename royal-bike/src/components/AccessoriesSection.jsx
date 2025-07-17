@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/rutes";
 
 const AccessoriesSection = () => {
   const [listGear, setListGear] = useState([]);
@@ -8,7 +9,7 @@ const AccessoriesSection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-      fetch("http://localhost:8000/api/gear-discounts/")
+      fetch(API_ENDPOINTS.GEAR_DISCOUNTS)
         .then((res) => res.json())
         .then((data) => {
           setListGear(data);
@@ -33,7 +34,7 @@ const AccessoriesSection = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8000/api/cart/add/", {
+      const res = await fetch(API_ENDPOINTS.CART_ADD, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

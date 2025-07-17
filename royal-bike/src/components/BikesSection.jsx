@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config/rutes";
 
 const BikesSection = () => {
   const [sellBikes, setSellBikes] = useState([]);
@@ -8,7 +9,7 @@ const BikesSection = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/top-bicycles/")
+    fetch(API_ENDPOINTS.TOP_BICYCLES)
       .then((res) => res.json())
       .then((data) => {
         setSellBikes(data);
@@ -24,7 +25,7 @@ const BikesSection = () => {
     }
     console.log("Token enviado:", token);
     try {
-      const res = await fetch("http://localhost:8000/api/cart/add/", {
+      const res = await fetch(API_ENDPOINTS.CART_ADD, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

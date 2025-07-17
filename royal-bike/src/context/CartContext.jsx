@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/rutes";
 
 const CartContext = createContext();
 
@@ -14,7 +15,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/cart/view/", {
+      const res = await fetch(API_ENDPOINTS.CART_VIEW, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
