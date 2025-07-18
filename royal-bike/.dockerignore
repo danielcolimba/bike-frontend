@@ -1,4 +1,45 @@
-node_modules
-dist
-.git
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Archivos de construcción
+dist/
+build/
+
+# Archivos de desarrollo
+.env.local
+.env.development
+.env.test
+
+# Logs
+*.log
+logs/
+
+# Sistema de archivos
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+
+# Temporary
+.tmp/
+temp/

@@ -3,25 +3,51 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Copiar archivos de configuración de dependencias
 COPY package*.json ./
-# Instalar dependencias de producción y desarrollo
-RUN npm install
 
+# Instalar dependencias
+RUN npm ci --only=production
+
+# Instalar dependencias de desarrollo necesarias para el build
 RUN npm install terser --save-dev
 
-
+# Copiar el código fuente
 COPY . .
 
+# Definir argumentos de construcción para las variables de entorno
+# Estos valores pueden ser sobrescritos en docker-compose.yml o al hacer docker build
+ARG VITE_API_BASE_URL=/api
+ARG VITE_API_AUTH_BASE_URL=/auth
+ARG VITE_APP_ENV=production
+ARG VITE_PORT=3000
+
+# Establecer las variables de entorno para el build
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_API_AUTH_BASE_URL=$VITE_API_AUTH_BASE_URL
+ENV VITE_APP_ENV=$VITE_APP_ENV
+ENV VITE_PORT=$VITE_PORT
+
+# Construir la aplicación
 RUN npm run build
 
 # Etapa 2: Servidor web
 FROM nginx:alpine
 
+# Copiar los archivos construidos
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Configuración de Nginx personalizada
-#COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copiar configuración de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Crear directorio para logs de nginx
+RUN mkdir -p /var/log/nginx
+
+# Configuración de salud para el contenedor
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/ || exit 1
 
 EXPOSE 80
-# Iniciar Nginx en primer plano
+
+# Iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]

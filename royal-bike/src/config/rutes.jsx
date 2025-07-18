@@ -7,20 +7,20 @@ export const API_ENDPOINTS = {
   REGISTER: `${API_AUTH_BASE_URL}/auth/register/user/`,
   
   // Product endpoints
-  PRODUCTS: `${API_BASE_URL}/api/products/`,
+  PRODUCTS: `${API_BASE_URL}/products/`,
   
   // Cart endpoints
-  CART_VIEW: `${API_BASE_URL}/api/cart/view/`,
-  CART_ADD: `${API_BASE_URL}/api/cart/add/`,
-  CART_UPDATE: `${API_BASE_URL}/api/cart/update/`,
-  CART_REMOVE: `${API_BASE_URL}/api/cart/remove/`,
+  CART_VIEW: `${API_BASE_URL}/cart/view/`,
+  CART_ADD: `${API_BASE_URL}/cart/add/`,
+  CART_UPDATE: `${API_BASE_URL}/cart/update/`,
+  CART_REMOVE: `${API_BASE_URL}/cart/remove/`,
   
   // Purchase endpoints
-  BUY_CHECKOUT: `${API_BASE_URL}/api/buy/checkout/`,
+  BUY_CHECKOUT: `${API_BASE_URL}/buy/checkout/`,
   // Discount endpoints
-  GEAR_DISCOUNTS: `${API_BASE_URL}/api/gear-discounts/`,
+  GEAR_DISCOUNTS: `${API_BASE_URL}/gear-discounts/`,
   // Top bicycles endpoint
-  TOP_BICYCLES: `${API_BASE_URL}/api/top-bicycles/`
+  TOP_BICYCLES: `${API_BASE_URL}/top-bicycles/`
 };
 
 
