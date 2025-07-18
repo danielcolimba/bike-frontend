@@ -34,5 +34,6 @@ temp/
 .cache/
 # Environment variables
 .env
+.env.example
 royal-bike/src/output.css
 
