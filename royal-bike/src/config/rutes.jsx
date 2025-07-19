@@ -3,8 +3,8 @@ const API_AUTH_BASE_URL = import.meta.env.VITE_API_AUTH_BASE_URL || 'http://loca
 
 export const API_ENDPOINTS = {
   // Auth endpoints
-  LOGIN: `${API_AUTH_BASE_URL}/auth/login/`,
-  REGISTER: `${API_AUTH_BASE_URL}/auth/register/user/`,
+  LOGIN: `${API_AUTH_BASE_URL}/login/`,
+  REGISTER: `${API_AUTH_BASE_URL}/register/user/`,
   
   // Product endpoints
   PRODUCTS: `${API_BASE_URL}/products/`,
